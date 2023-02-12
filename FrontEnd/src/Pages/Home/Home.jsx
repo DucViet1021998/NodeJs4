@@ -13,7 +13,8 @@ function Home() {
         <div className={cx("container")}>
             <div className={cx("homepage")}>
                 <h1>HomePage</h1>
-                <Button type="primary"><Link to={'/login'}>Login</Link></Button>
+                <Button type="primary"><Link to={'/login'}>Sign In</Link></Button>
+                <Button type="primary"><Link to={'/register'}>Sign Up</Link></Button>
             </div>
         </div>
     )

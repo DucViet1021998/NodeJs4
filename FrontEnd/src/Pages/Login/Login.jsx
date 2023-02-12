@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Button, Checkbox, Form, Input } from 'antd';
 import axios from 'axios'
-
+import { useNavigate } from "react-router-dom";
+import { Store } from "../../store/store";
 
 
 import classNames from 'classnames/bind';
@@ -11,16 +12,21 @@ import styles from './login.module.scss';
 const cx = classNames.bind(styles);
 
 
-const Login = (props) => {
+const Login = () => {
+    const store = useContext(Store)
+    const navigate = useNavigate()
+
     // console.log(props);
     const onFinish = async (values) => {
 
         // console.log('Success:', values);
-        const response = await axios.post("http://localhost:3010/login", values);
-        // console.log("token", response.data);
+        const response = await axios.get("http://localhost:3010/login", values);
+        console.log("token", response.data);
 
         if (response.status === 200) {
-            props.setLogin(true);
+            store.login = true
+            localStorage.setItem('token', response.data)
+            navigate('/dashboard')
         }
     };
     const onFinishFailed = (errorInfo) => {
@@ -31,6 +37,7 @@ const Login = (props) => {
     return (
         <div className={cx('container')}>
             <div className={cx('form')}>
+
                 <Form
                     name="basic"
                     labelCol={{
@@ -93,7 +100,7 @@ const Login = (props) => {
                         }}
                     >
                         <Button type="primary" htmlType="submit">
-                            Submit
+                            Sign in
                         </Button>
                     </Form.Item>
                 </Form>

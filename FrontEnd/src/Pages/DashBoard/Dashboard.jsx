@@ -1,8 +1,8 @@
 import React from 'react';
-import { Breadcrumb, Layout, Menu, theme } from 'antd';
+import { Breadcrumb, Layout, Menu, theme, Button } from 'antd';
 import { LaptopOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
-
-
+import { Link } from 'react-router-dom';
+import './dashboard.css'
 
 const { Header, Content, Sider } = Layout;
 const items1 = ['1', '2', '3'].map((key) => ({
@@ -26,16 +26,18 @@ const items2 = [UserOutlined, LaptopOutlined, NotificationOutlined].map((icon, i
 });
 
 
-
 const Dashboard = () => {
+    const handleClickBtn = () => {
+        localStorage.removeItem("token");
+    }
     const {
         token: { colorBgContainer },
     } = theme.useToken();
     return (
         <Layout>
-            <Header className="header">
-                <div className="logo" />
-                <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['2']} items={items1} />
+            <Header className='header'>
+                <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['1']} items={items1} >
+                </Menu>
             </Header>
             <Layout>
                 <Sider
@@ -77,8 +79,11 @@ const Dashboard = () => {
                             background: colorBgContainer,
                         }}
                     >
-                        Content
+                        <Button className='btn' onClick={handleClickBtn} type="primary">
+                            <Link to={'/'}>Log out</Link>
+                        </Button>
                     </Content>
+
                 </Layout>
             </Layout>
         </Layout>
