@@ -13,25 +13,31 @@ const cx = classNames.bind(styles);
 
 
 const Login = () => {
+
     const store = useContext(Store)
     const navigate = useNavigate()
 
     // console.log(props);
     const onFinish = async (values) => {
 
-        // console.log('Success:', values);
-        const response = await axios.get("http://localhost:3010/login", values);
+        const response = await axios.post("http://localhost:3010/login", values);
         console.log("token", response.data);
 
         if (response.status === 200) {
             store.login = true
             localStorage.setItem('token', response.data)
             navigate('/dashboard')
+        } else if (response.status === 404) {
+            console.log(response.data)
         }
     };
     const onFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
     };
+
+    const handleClick = () => {
+
+    }
 
 
     return (
@@ -99,7 +105,7 @@ const Login = () => {
                             span: 16,
                         }}
                     >
-                        <Button type="primary" htmlType="submit">
+                        <Button type="primary" htmlType="submit" onClick={handleClick}>
                             Sign in
                         </Button>
                     </Form.Item>

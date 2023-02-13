@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Breadcrumb, Layout, Menu, theme, Button } from 'antd';
 import { LaptopOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './dashboard.css'
+import { Store } from '../../store/store';
+
 
 const { Header, Content, Sider } = Layout;
 const items1 = ['1', '2', '3'].map((key) => ({
@@ -27,12 +29,20 @@ const items2 = [UserOutlined, LaptopOutlined, NotificationOutlined].map((icon, i
 
 
 const Dashboard = () => {
+    const navigate = useNavigate()
+    const store = useContext(Store)
+
     const handleClickBtn = () => {
         localStorage.removeItem("token");
+        store.login = false
+        navigate('/')
     }
+
     const {
         token: { colorBgContainer },
     } = theme.useToken();
+
+
     return (
         <Layout>
             <Header className='header'>
@@ -80,7 +90,7 @@ const Dashboard = () => {
                         }}
                     >
                         <Button className='btn' onClick={handleClickBtn} type="primary">
-                            <Link to={'/'}>Log out</Link>
+                            Log out
                         </Button>
                     </Content>
 

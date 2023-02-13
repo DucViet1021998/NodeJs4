@@ -1,62 +1,75 @@
 const express = require('express')
 const app = express()
 const router = express.Router()
+const userModel = require('./Models/UserModel')
+const jwt = require('jsonwebtoken')
+const dotenv = require('dotenv')
+const bcrypt = require('bcrypt')
 
 
-const mongoose = require('mongoose');
-mongoose.connect('mongodb://127.0.0.1:27017/UserLogin');
+dotenv.config()
 
-const { Schema } = mongoose;
-
+const cors = require('cors')
+app.use(cors())
 app.use(express.json())
 
-const userSchema = new Schema({
-    name: mongoose.Schema.Types.String,
-    password: mongoose.Schema.Types.Number
 
-});
 
-const userModel = mongoose.model('user', userSchema);
+router.post('/login', async (req, res) => {
+    try {
+        const username = req.body.username
+        const user = await userModel.findOne({ username: username })
+        if (!!user) {
+            const passwordLogin = req.body.password
+            const passwordDB = user.password
+            const equalCompare = await bcrypt.compare(passwordLogin, passwordDB)
+            if (equalCompare === true) {
+                const token = jwt.sign(user.id, process.env.ACCESS_TOKEN_SECRET)
+                res.send(token)
+            } else {
+                res.send('Not Match password!')
+            }
+        }
+        else {
+            res.status(404).send('Not Found Your Account')
+        }
+
+
+    } catch (error) {
+        console.log(error);
+        res.send('Error!')
+    }
+})
+
+
+
+
 
 router.post('/register', async (req, res) => {
     try {
-        // if (!req.body.name || !req.body.age || !req.body.address || !req.body.gender) {
-        //     return res.send('Nhập hết tên tuổi số nhà giới tính đi thằng ngu! ')
-        // }
 
-        const user = await userModel.create({
-            name: req.body.name,
-            age: req.body.age,
-            address: req.body.address,
-            gender: req.body.gender,
-            album: req.body.album,
-        })
-        res.send(user)
+        const username = req.body.username
+        const user = await userModel.findOne({ username: username })
+        if (!!user) {
+            res.status(401).send('Da Co Tai Khoan')
 
-
-    } catch (error) {
-        console.log(error);
-        res.send("Error!")
-    }
-})
-
-
-
-
-router.get('/login', async (req, res) => {
-    try {
-        console.log(req.body);
-        res.send('token')
+        }
+        else {
+            const hashedPass = await bcrypt.hash(req.body.password, 10)
+            await userModel.create({
+                username: req.body.username,
+                email: req.body.email,
+                gender: req.body.gender,
+                password: hashedPass
+            })
+            res.status(200).send('Success')
+        }
 
     } catch (error) {
         console.log(error);
         res.send("Error!")
     }
 })
-
-
-
-
 
 
 module.exports = router

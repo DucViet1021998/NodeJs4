@@ -1,114 +1,178 @@
-import React from 'react';
-import { Button, Checkbox, Form, Input } from 'antd';
+import { Button, Form, Input, message, Select, Alert } from 'antd';
+import React, { useState } from 'react';
+import axios from 'axios'
 
-import 'antd/dist/reset.css';
+import { useNavigate } from 'react-router-dom';
+const { Option } = Select;
 import classNames from 'classnames/bind';
 import styles from './register.module.scss';
 
 
 const cx = classNames.bind(styles);
 
-const MyFormItemContext = React.createContext([]);
-function toArr(str) {
-    return Array.isArray(str) ? str : [str];
-}
-
-
-const MyFormItemGroup = ({ prefix, children }) => {
-    const prefixPath = React.useContext(MyFormItemContext);
-    const concatPath = React.useMemo(() => [...prefixPath, ...toArr(prefix)], [prefixPath, prefix]);
-    return <MyFormItemContext.Provider value={concatPath}>{children}</MyFormItemContext.Provider>;
+const formItemLayout = {
+    labelCol: {
+        xs: {
+            span: 24,
+        },
+        sm: {
+            span: 10,
+        },
+    },
+    wrapperCol: {
+        xs: {
+            span: 24,
+        },
+        sm: {
+            span: 16,
+        },
+    },
 };
 
 
-const MyFormItem = ({ name, ...props }) => {
-    const prefixPath = React.useContext(MyFormItemContext);
-    const concatName = name !== undefined ? [...prefixPath, ...toArr(name)] : undefined;
-    return <Form.Item name={concatName} {...props} />;
+
+const tailFormItemLayout = {
+    wrapperCol: {
+        xs: {
+            span: 24,
+            offset: 0,
+        },
+        sm: {
+            span: 16,
+            offset: 8,
+        },
+    },
 };
 
 
 
 const Register = () => {
+    const [form] = Form.useForm();
+    const navigate = useNavigate()
+    const onFinish = async (values) => {
+        try {
+            const response = await axios.post("http://localhost:3010/register", values);
+            if (response.status === 401) {
+                return console.log(response.data);
+            }
 
-
-    const onFinish = (value) => {
-        console.log(value);
+            if (response.status === 200) {
+                return navigate('/login')
+            }
+        } catch (error) {
+            console.log(error);
+        }
     };
-
-    const onFinishFailed = (errorInfo) => {
-        console.log('Failed:', errorInfo);
-    };
-
-
     return (
         <div className={cx('container')}>
             <div className={cx('form')}>
-                <h2>Register</h2>
+                <h1>Register</h1>
                 <Form
-                    name="basic"
-                    labelCol={{
-                        span: 8,
-                    }}
-                    wrapperCol={{
-                        span: 16,
-                    }}
+                    {...formItemLayout}
+                    form={form}
+                    name="register"
+                    onFinish={onFinish}
+
                     style={{
                         maxWidth: 600,
                     }}
-                    initialValues={{
-                        remember: true,
-                    }}
-                    onFinish={onFinish}
-                    onFinishFailed={onFinishFailed}
-                    autoComplete="off"
+                    scrollToFirstError
                 >
                     <Form.Item
-                        label="Username"
+                        name="email"
+                        label="E-mail"
+                        rules={[
+                            {
+                                type: 'email',
+                                message: 'The input is not valid E-mail!',
+                            },
+                            {
+                                required: true,
+                                message: 'Please input your E-mail!',
+                            },
+
+                        ]}
+                    >
+                        <Input />
+
+                    </Form.Item>
+                    <Form.Item
                         name="username"
+                        label="Username"
+                        tooltip="Used to Sign in"
                         rules={[
                             {
                                 required: true,
-                                message: 'Please input your username!',
+                                message: 'Please input your nickname!',
+                                whitespace: true,
+                            },
+                            {
+                                type: 'any',
+                                message: 'Da co tai khoan',
                             },
                         ]}
                     >
                         <Input />
-                    </Form.Item>
 
+                    </Form.Item>
                     <Form.Item
-                        label="Password"
                         name="password"
+                        label="Password"
                         rules={[
                             {
                                 required: true,
                                 message: 'Please input your password!',
                             },
                         ]}
+                        hasFeedback
                     >
                         <Input.Password />
                     </Form.Item>
 
                     <Form.Item
-                        label="Retype Password"
-                        name="password"
+                        name="confirm"
+                        label="Confirm Password"
+                        dependencies={['password']}
+                        hasFeedback
                         rules={[
                             {
                                 required: true,
-                                message: 'Please Retype your password!',
+                                message: 'Please confirm your password!',
                             },
+                            ({ getFieldValue }) => ({
+                                validator(_, value) {
+                                    if (!value || getFieldValue('password') === value) {
+                                        return Promise.resolve();
+                                    }
+                                    return Promise.reject(new Error('The two passwords that you entered do not match!'));
+                                },
+                            }),
                         ]}
                     >
                         <Input.Password />
                     </Form.Item>
                     <Form.Item
-                        wrapperCol={{
-                            offset: 8,
-                            span: 16,
-                        }}
+                        name="gender"
+                        label="Gender"
+                        rules={[
+                            {
+                                required: true,
+                                message: 'Please select gender!',
+                            },
+                        ]}
                     >
+                        <Select placeholder="select your gender">
+                            <Option value="male">Male</Option>
+                            <Option value="female">Female</Option>
+                            <Option value="other">BeDe</Option>
+                        </Select>
+                    </Form.Item>
+
+
+
+                    <Form.Item {...tailFormItemLayout}>
                         <Button type="primary" htmlType="submit">
-                            Sign up
+                            Register
                         </Button>
                     </Form.Item>
                 </Form>
@@ -116,8 +180,4 @@ const Register = () => {
         </div>
     );
 };
-
-
-
-
 export default Register;

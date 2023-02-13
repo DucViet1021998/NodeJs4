@@ -12,6 +12,7 @@ import { Store } from "./store/store";
 
 const App = () => {
   const [login, setLogin] = useState(false)
+
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (token) setLogin(true)
