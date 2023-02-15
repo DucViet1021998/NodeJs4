@@ -1,10 +1,10 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Breadcrumb, Layout, Menu, theme, Button } from 'antd';
 import { LaptopOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import './dashboard.css'
 import { Store } from '../../store/store';
-
+import axios from 'axios'
 
 const { Header, Content, Sider } = Layout;
 const items1 = ['1', '2', '3'].map((key) => ({
@@ -32,11 +32,59 @@ const Dashboard = () => {
     const navigate = useNavigate()
     const store = useContext(Store)
 
+    useEffect(() => {
+        async function getUsers() {
+            const accessToken = localStorage.getItem('accessToken')
+            const refreshToken = localStorage.getItem('refreshToken')
+            try {
+                const users = await axios.get('http://localhost:3010/', {
+                    headers: { Authorization: `Beaer ${accessToken}` }
+                })
+                return users
+            } catch (error) {
+                console.log(error);
+                if (error.response.status === 401) {
+                    // Refresh Token
+                    const response = await axios.post('http://localhost:3010/refresh-token',
+                        {
+                            accessToken: accessToken,
+                            refreshToken: refreshToken
+                        })
+                    localStorage.setItem("accessToken", response.data.accessToken);
+                    localStorage.setItem("refreshToken", response.data.refreshToken);
+
+                    // Return Function
+                    return getUsers()
+                }
+                console.log(error);
+            }
+        }
+        getUsers()
+    }, []);
+
+
     const handleClickBtn = () => {
-        localStorage.removeItem("token");
-        store.login = false
-        navigate('/')
+        useEffect(() => {
+            async function deleteUser() {
+                try {
+                    const response = await axios.post('http://localhost:3010/logout')
+                    if (response.status === 200) {
+                        localStorage.removeItem("accessToken");
+                        localStorage.removeItem("refreshToken");
+                        store.login = false
+                        navigate('/')
+                    }
+                    else {
+                        console.log("error1");
+                    }
+                } catch (error) {
+                    console.log('error2');
+                }
+            }
+            deleteUser()
+        }, [])
     }
+
 
     const {
         token: { colorBgContainer },

@@ -9,6 +9,8 @@ const userSchema = new Schema({
     password: mongoose.Schema.Types.String,
     email: mongoose.Schema.Types.String,
     gender: mongoose.Schema.Types.String,
+    accessToken: mongoose.Schema.Types.String,
+    refreshToken: mongoose.Schema.Types.String,
 })
 
 const userModel = mongoose.model('users', userSchema);

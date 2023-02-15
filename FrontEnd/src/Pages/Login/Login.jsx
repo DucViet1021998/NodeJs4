@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Button, Checkbox, Form, Input } from 'antd';
+import { Button, Checkbox, Form, Input, message } from 'antd';
 import axios from 'axios'
 import { useNavigate } from "react-router-dom";
 import { Store } from "../../store/store";
@@ -13,31 +13,36 @@ const cx = classNames.bind(styles);
 
 
 const Login = () => {
-
+    const [messageApi, contextHolder] = message.useMessage();
     const store = useContext(Store)
     const navigate = useNavigate()
 
-    // console.log(props);
+
     const onFinish = async (values) => {
+        try {
+            const response = await axios.post("http://localhost:3010/login", values);
+            if (response.status === 200) {
+                store.login = true;
+                localStorage.setItem("accessToken", response.data.accessToken);
+                localStorage.setItem("refreshToken", response.data.refreshToken);
+                console.log(localStorage.accessToken);
+                navigate("/dashboard");
+            }
 
-        const response = await axios.post("http://localhost:3010/login", values);
-        console.log("token", response.data);
-
-        if (response.status === 200) {
-            store.login = true
-            localStorage.setItem('token', response.data)
-            navigate('/dashboard')
-        } else if (response.status === 404) {
-            console.log(response.data)
+        } catch (error) {
+            messageApi.open({
+                type: 'error',
+                content: 'Not Found Your Account!',
+            });
         }
     };
+
+
+
     const onFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
     };
 
-    const handleClick = () => {
-
-    }
 
 
     return (
@@ -99,13 +104,14 @@ const Login = () => {
                         <Checkbox>Remember me</Checkbox>
                     </Form.Item>
 
+                    {contextHolder}
                     <Form.Item
                         wrapperCol={{
                             offset: 8,
                             span: 16,
                         }}
                     >
-                        <Button type="primary" htmlType="submit" onClick={handleClick}>
+                        <Button type="primary" htmlType="submit">
                             Sign in
                         </Button>
                     </Form.Item>

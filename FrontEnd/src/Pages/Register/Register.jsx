@@ -1,5 +1,5 @@
-import { Button, Form, Input, message, Select, Alert } from 'antd';
-import React, { useState } from 'react';
+import { Button, Form, Input, Select, message } from 'antd';
+import React from 'react';
 import axios from 'axios'
 
 import { useNavigate } from 'react-router-dom';
@@ -47,22 +47,25 @@ const tailFormItemLayout = {
 
 
 const Register = () => {
+    const [messageApi, contextHolder] = message.useMessage();
     const [form] = Form.useForm();
     const navigate = useNavigate()
     const onFinish = async (values) => {
         try {
             const response = await axios.post("http://localhost:3010/register", values);
-            if (response.status === 401) {
-                return console.log(response.data);
-            }
-
             if (response.status === 200) {
                 return navigate('/login')
             }
         } catch (error) {
-            console.log(error);
+            messageApi.open({
+                type: 'error',
+                content: 'This is an error message',
+            });
         }
     };
+
+
+
     return (
         <div className={cx('container')}>
             <div className={cx('form')}>
@@ -78,6 +81,8 @@ const Register = () => {
                     }}
                     scrollToFirstError
                 >
+
+                    {/* Input Email */}
                     <Form.Item
                         name="email"
                         label="E-mail"
@@ -94,8 +99,10 @@ const Register = () => {
                         ]}
                     >
                         <Input />
-
                     </Form.Item>
+                    {/* END OF Input Email */}
+
+                    {/* Input Username */}
                     <Form.Item
                         name="username"
                         label="Username"
@@ -106,15 +113,14 @@ const Register = () => {
                                 message: 'Please input your nickname!',
                                 whitespace: true,
                             },
-                            {
-                                type: 'any',
-                                message: 'Da co tai khoan',
-                            },
                         ]}
                     >
                         <Input />
-
                     </Form.Item>
+
+                    {/* END OF Input Username */}
+
+                    {/* Input PassWord */}
                     <Form.Item
                         name="password"
                         label="Password"
@@ -123,12 +129,19 @@ const Register = () => {
                                 required: true,
                                 message: 'Please input your password!',
                             },
+                            // {
+                            //     min: 6,
+                            //     message: 'danh du 6 ky tu',
+                            // },
+
                         ]}
                         hasFeedback
                     >
                         <Input.Password />
                     </Form.Item>
+                    {/* END OF Input PassWord */}
 
+                    {/* Input PassWord */}
                     <Form.Item
                         name="confirm"
                         label="Confirm Password"
@@ -151,6 +164,9 @@ const Register = () => {
                     >
                         <Input.Password />
                     </Form.Item>
+                    {/* END OF Input PassWord */}
+
+                    {/* Select Gender */}
                     <Form.Item
                         name="gender"
                         label="Gender"
@@ -168,13 +184,17 @@ const Register = () => {
                         </Select>
                     </Form.Item>
 
+                    {/* END OF Select Gender */}
 
-
+                    {/* Button Submit */}
+                    {contextHolder}
                     <Form.Item {...tailFormItemLayout}>
                         <Button type="primary" htmlType="submit">
                             Register
                         </Button>
                     </Form.Item>
+                    {/* END OF Button Submit */}
+
                 </Form>
             </div>
         </div>
