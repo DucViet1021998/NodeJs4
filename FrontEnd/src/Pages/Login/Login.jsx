@@ -25,7 +25,6 @@ const Login = () => {
                 store.login = true;
                 localStorage.setItem("accessToken", response.data.accessToken);
                 localStorage.setItem("refreshToken", response.data.refreshToken);
-                console.log(localStorage.accessToken);
                 navigate("/dashboard");
             }
 

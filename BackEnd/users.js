@@ -33,7 +33,7 @@ router.post('/login', async (req, res) => {
                 const accessToken = jwt.sign({ id: user.id, username: user.username },
                     process.env.ACCESS_TOKEN_SECRET,
                     {
-                        expiresIn: "600s"
+                        expiresIn: "5s"
                     })
 
                 // When AccessToken expired make refreshToken
@@ -47,7 +47,6 @@ router.post('/login', async (req, res) => {
                 user.save()
 
                 // Response Tokens to FrontEnd
-                console.log({ accessToken: accessToken });
                 return res.status(200).send({ accessToken: accessToken, refreshToken: refreshToken });
             }
             if (equalCompare === false) {
@@ -121,26 +120,31 @@ const checkToken = async (req, res, next) => {
     }
 };
 
+
+// Get User khi vào router cần login
 router.get("/", checkToken, async (req, res) => {
     const users = await userModel.find({}).lean();
     res.status(200).send(users);
+
 });
 
 
 router.post("/refresh-token", checkToken, async (req, res) => {
+
     /// Lay access token va refresh token
     const { accessToken, refreshToken } = req.body;
+    console.log(req.body);
+    console.log({ accessToken, refreshToken });
     const user = await userModel.findOne({ accessToken, refreshToken });
     if (!user) {
         res.status(400).send("Can not find user");
     }
+
     const newAccessToken = jwt.sign({ id: user.id, username: user.username },
         process.env.ACCESS_TOKEN_SECRET,
         {
-            expiresIn: "600s"
+            expiresIn: "10s"
         })
-
-
     const newRefreshToken = jwt.sign({ id: user.id, username: user.username },
         process.env.REFRESH_TOKEN_SECRET
     )

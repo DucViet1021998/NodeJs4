@@ -10,13 +10,17 @@ import PrivateLayout from './layout/PrivateLayout'
 import { Store } from "./store/store";
 
 
+
 const App = () => {
   const [login, setLogin] = useState(false)
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('accessToken')
+    // const refreshToken = localStorage.getItem('refreshToken')
     if (token) setLogin(true)
   }, [])
+
+
 
   return (
     <Store.Provider value={{ login, setLogin }}>

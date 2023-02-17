@@ -33,57 +33,73 @@ const Dashboard = () => {
     const store = useContext(Store)
 
     useEffect(() => {
+
+        // GỌI USER LẦN ĐẦU KHI LOGIN THÀNH CÔNG
         async function getUsers() {
             const accessToken = localStorage.getItem('accessToken')
             const refreshToken = localStorage.getItem('refreshToken')
             try {
                 const users = await axios.get('http://localhost:3010/', {
-                    headers: { Authorization: `Beaer ${accessToken}` }
+                    headers: { Authorization: `Bearer ${accessToken}` }
                 })
                 return users
-            } catch (error) {
-                console.log(error);
+            }
+
+
+            // KHI ACCESSTOKEN HẾT HẠN THÌ CALL API REFRESH TOKEN
+            catch (error) {
                 if (error.response.status === 401) {
-                    // Refresh Token
+
+                    console.log('da het han');
+                    // Refresh Token 
                     const response = await axios.post('http://localhost:3010/refresh-token',
                         {
                             accessToken: accessToken,
                             refreshToken: refreshToken
                         })
+
+                    localStorage.clear()
                     localStorage.setItem("accessToken", response.data.accessToken);
                     localStorage.setItem("refreshToken", response.data.refreshToken);
+                    store.login = true
 
                     // Return Function
                     return getUsers()
                 }
-                console.log(error);
+
             }
         }
         getUsers()
+
     }, []);
 
 
-    const handleClickBtn = () => {
-        useEffect(() => {
-            async function deleteUser() {
-                try {
-                    const response = await axios.post('http://localhost:3010/logout')
-                    if (response.status === 200) {
-                        localStorage.removeItem("accessToken");
-                        localStorage.removeItem("refreshToken");
-                        store.login = false
-                        navigate('/')
+    const handleClickBtn = async () => {
+        try {
+            const accessToken = localStorage.getItem('accessToken')
+            const response = await axios.post('http://localhost:3010/logout',
+                {},
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`
                     }
-                    else {
-                        console.log("error1");
-                    }
-                } catch (error) {
-                    console.log('error2');
-                }
+                })
+            if (response.status === 200) {
+                localStorage.removeItem("accessToken");
+                localStorage.removeItem("refreshToken");
+                store.login = false
+                navigate('/')
             }
-            deleteUser()
-        }, [])
+            else {
+                console.log("error1");
+            }
+        } catch (error) {
+            console.log('error2');
+        }
     }
+
+
+
 
 
     const {
